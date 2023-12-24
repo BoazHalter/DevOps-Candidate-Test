@@ -60,7 +60,7 @@ spec:
         - name: nodejs-app
           image: your-nodejs-image:tag
           ports:
-            - containerPort: 3000  # Change this to your Node.js app's port
+            - containerPort: 5000  # Change this to your Node.js app's port
           volumeMounts:
             - name: config-volume
               mountPath: /app/config  # Mount path for the ConfigMap
