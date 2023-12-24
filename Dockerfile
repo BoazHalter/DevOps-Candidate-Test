@@ -5,8 +5,8 @@ FROM node:14
 WORKDIR /usr/src/app
 
 # Copy package.json and package-lock.json to the working directory
-COPY package*.json ./
-
+COPY node-hello/package*.json ./
+COPY README.md ./
 # Install Node.js dependencies
 RUN npm install
 
