@@ -1,10 +1,30 @@
+# Import required libraries
+from git import Repo
 import os
 import sys
-import requests
 import shutil
+import git
 import zipfile
-from github import Github
+import subprocess
+import json
+import zipfile
+import requests
 
+# GitHub repository URL
+repo_url = "https://github.com/johnpapa/node-hello"
+
+# Destination directory where the repository will be cloned
+destination_dir = "./node-hello"  # Change this to your desired destination directory
+
+# Path to your package.json file
+package_json_path = "./node-hello/package.json"  # Update this path to match your project
+
+repository_name = "johnpapa/node-hello"
+
+readme_url = "https://raw.githubusercontent.com/BoazHalter/DevOps-Candidate-Test/main/README.md"
+
+
+# Function to download README.md from a given URL
 def download_readme(url):
     try:
         response = requests.get(url)
@@ -17,66 +37,66 @@ def download_readme(url):
     except Exception as e:
         print(f"An error occurred while downloading README.md: {str(e)}")
 
-def update_node_app_version(repo, new_version):
+
+# Function to zip a folder
+def zipFolder():
     try:
-        # Clone the repository
-        repo_path = "/path/to/local/repo"  # Replace this with your desired local path
-        cloned_repo = repo.clone_to(repo_path)
-
-        # Navigate to the app directory
-        app_directory = os.path.join(repo_path, "node-hello")
-        os.chdir(app_directory)
-
-        # Update package.json with the new version
-        with open("package.json", "r") as file:
-            data = file.read()
-            data = data.replace('"version": "1.0.0"', f'"version": "{new_version}"')
-
-        with open("package.json", "w") as file:
-            file.write(data)
-
-        # Commit changes
-        cloned_repo.index.add(["package.json"])
-        cloned_repo.index.commit(f"Bump version to {new_version}")
-
-        # Push changes to the repository
-        cloned_repo.remote().push()
-
-        print(f"Node.js app version updated to {new_version} successfully.")
-
         # Zip the app folder
-        app_folder = os.path.join(repo_path, "node-hello")
+        app_folder = destination_dir
         zip_filename = f"app-{new_version}.zip"
-        zip_path = os.path.join(repo_path, zip_filename)
+        zip_path = os.path.join(destination_dir, zip_filename)
         shutil.make_archive(app_folder, 'zip', app_folder)
-        os.rename(f"{app_folder}.zip", zip_path)
+        os.rename(f"{app_folder}.zip", zip_filename)
         print(f"Node.js app folder zipped as {zip_filename}")
     except Exception as e:
-        print(f"An error occurred: {str(e)}")
+        print(f"Failed to ZIP App Folder: {e}")
+
+
+# Function to update the version in package.json file
+def update_node_version(package_json_path, new_version):
+    try:
+        with open(package_json_path, 'r') as file:
+            data = json.load(file)
+            # Update the version in package.json
+            data['version'] = new_version
+
+        with open(package_json_path, 'w') as file:
+            # Write the updated JSON back to the file
+            json.dump(data, file, indent=2)
+        print(f"Updated version to {new_version} in {package_json_path}")
+    except Exception as e:
+        print(f"Failed to update version: {e}")
+
+
+# Function to clone a repository
+def clone_repository(url, dest_dir):
+    try:
+        # Clone the repository
+        Repo.clone_from(url, dest_dir)
+        print("Repository cloned successfully.")
+    except Exception as e:
+        print(f"Failed to clone the repository: {e}")
+
 
 if __name__ == "__main__":
-    github_access_token = "YOUR_GITHUB_ACCESS_TOKEN"
-    repository_name = "johnpapa/node-hello"
-    readme_url = "https://raw.githubusercontent.com/BoazHalter/DevOps-Candidate-Test/main/README.md"
-
-    # Download README.md file
-    download_readme(readme_url)
-
     # Get the new version number from the argument or environment variable
     if len(sys.argv) > 1:
-        new_version_number = sys.argv[1]
+        new_version = sys.argv[1]
     else:
-        new_version_number = os.environ.get("APP_VERSION")
+        new_version = os.environ.get("APP_VERSION")
 
     # Check if the version number is provided
-    if not new_version_number:
+    if not new_version:
         print("Please provide a version number.")
     else:
-        # Authenticate with GitHub using an access token
-        g = Github(github_access_token)
-        
-        # Get the repository
-        repo = g.get_repo(repository_name)
-
-        # Call function to update the Node.js app version
-        update_node_app_version(repo, new_version_number)
+        try:
+            # Clone the repository
+            clone_repository(repo_url, destination_dir)
+            # Update the version in package.json
+            update_node_version(package_json_path, new_version)
+            # Download README.md file
+            download_readme(readme_url)
+            # Zip the app folder
+            zipFolder()
+        except Exception as e:
+            print(f"Failed at: {e}")
