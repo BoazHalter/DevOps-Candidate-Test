@@ -33,10 +33,14 @@ Good Luck
  Please Send us the script file, the docker files and the answers to 3c (instead you can add the solution to the docker | k8s files)
      
  Good Luck
-  
-  
-  
-  
-  
+
+## Recomendation to storing secrects:
+
+HashiCorp Vault, AWS Secrets Manager, Azure Key Vault
+
+## Recomendation to support different deployments:
+
+Maintaining a diffenrent set of values/config per deployment/environment
+
   
   
